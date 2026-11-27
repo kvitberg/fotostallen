@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tjenester – Fotostallen</title>
+<link href="fonts/spacemono.css" rel="stylesheet">
+<link href="fotobok.css" rel="stylesheet">
+<style>
+  /* ---------- Tjenestesiden: ett oppslag per tjeneste, som det gamle arbeid-oppslaget ---------- */
+  .s-hero{padding-top:clamp(64px,10vh,92px)}
+  .s-hero .fx{flex:1}
+  .s-hero .caprow{margin-top:26px}
+  .toc{margin-top:clamp(16px,3vh,28px);border-top:1px solid var(--svart);max-width:420px}
+  .toc a{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:baseline;padding:clamp(5px,.9vh,8px) 0;border-bottom:1px solid #e3dcdd;font-size:12px}
+  .toc .n{color:var(--rod)}
+  .toc .arr{transition:transform .35s var(--ease)}
+  .toc a:hover .arr{transform:translateX(5px)}
+  .toc a:hover .t{color:var(--rod)}
+  .svc .kick{margin-bottom:clamp(8px,1.6vh,14px)}
+  .svc-p{max-width:46ch;margin-top:clamp(10px,1.8vh,16px)}
+  .svc-row{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:clamp(10px,1.4vw,18px);margin-top:clamp(16px,3vh,30px)}
+  .svc-row figure,.gal-grid figure,.gal-big,.film-grid figure,.film-feature{display:flex;flex-direction:column;min-height:0}
+  .svc-row .ph,.gal-grid .ph,.gal-big .ph{flex:1}
+  .svc-row figcaption,.gal-grid figcaption,.gal-big figcaption,.film-grid figcaption,.film-feature figcaption{margin-top:8px}
+  .svc-cta{display:flex;gap:10px 20px;align-items:center;flex-wrap:wrap;margin-top:clamp(12px,2.2vh,20px);font-size:11px}
+  .lnk{position:relative;padding:4px 0;background:linear-gradient(currentColor,currentColor) 0 88%/100% 1px no-repeat;transition:background-size .4s var(--ease)}
+  .lnk:hover{background-size:35% 1px}
+  .svc .facts{grid-template-columns:minmax(120px,32%) minmax(0,1fr);max-width:560px}
+  .svc .facts dd{color:var(--svart)}
+  .menu a[aria-current]{background-size:100% 1px}
+
+  /* Bildeoppslag: ett stort bilde til venstre, et rutenett til høyre */
+  .gal-big{flex:1}
+  .gal-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:clamp(12px,2vh,20px) clamp(10px,1.4vw,18px)}
+  .gal-grid .span{grid-column:1/-1}
+  .gal-grid.c3{grid-template-columns:repeat(3,minmax(0,1fr))}  /* seks stående portretter */
+
+  /* Filmer: forsidebildet vises til man trykker, først da lastes YouTube (uten informasjonskapsler) */
+  .film-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1.5fr 1fr 1fr;gap:clamp(12px,2vh,20px) clamp(10px,1.4vw,18px)}
+  .film-grid .feat{grid-column:1/-1}
+  .film-grid.g4{grid-template-rows:1fr 1fr}
+  .film-feature{display:flex;flex-direction:column;flex:1;min-height:0;margin-top:clamp(14px,2.6vh,24px)}
+  .film-feature .ph{flex:1}
+  .film-grid .ph{flex:1}
+  /* SoMe-filmen: stående, spilles av uten lyd i løkke når den er i bildet */
+  .reel{flex:1;min-height:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(12px,1.6vw,22px);align-items:end;margin-top:clamp(14px,2.6vh,26px)}
+  .reel .ph{height:100%;aspect-ratio:var(--ar,9/16)}
+  /* Reel alene på en side: filmen så stor som siden tillater, teksten under */
+  .reel.solo{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;justify-items:center;margin-top:0}
+  .reel.solo .ph{max-width:100%}
+  .reel.solo .reel-side{flex-direction:row;align-items:center;gap:16px;justify-self:stretch;justify-content:space-between}
+  .ph video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.2);transition:transform 2.2s var(--ease);transition-delay:var(--d,.1s)}
+  .in .ph video{transform:scale(1)}
+  .reel-side{display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding-bottom:2px}
+  .sound{position:relative;font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--svart);background:none;border:1px solid var(--svart);border-radius:999px;padding:4px 12px;cursor:pointer;transition:background .3s,color .3s}
+  .sound:hover,.sound[aria-pressed=true]{background:var(--svart);color:#fff}
+  .vid{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;margin:0;background:#111;cursor:pointer;display:block;z-index:1}
+  .vid .play{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:var(--rod);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -10px rgba(0,0,0,.6);transition:transform .35s var(--ease)}
+  .vid:hover .play,.vid:focus-visible .play{transform:scale(1.1)}
+  .vid .play svg{margin-left:3px}
+  .ph iframe{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:2}
+
+  /* Lave, brede vinduer: innholdsfortegnelsen med åtte linjer får plass over sidetallet */
+  @media (min-width:901px) and (max-height:760px){
+    .toc{margin-top:12px}
+    .toc a{padding:3px 0}
+    #s0 .lead{margin-top:10px}
+  }
+  @media (max-width:900px){
+    .s-hero{padding-top:12px}
+    .s-hero .fx{min-height:56svh}
+    .svc-row,.gal-grid,.film-grid{grid-template-columns:minmax(0,1fr);grid-template-rows:none;flex:none;grid-auto-rows:auto}
+    .film-grid .ph{flex:none;aspect-ratio:16/9}
+    .film-feature{flex:none}
+    .film-feature .ph{flex:none;aspect-ratio:16/9}
+    .reel{grid-template-columns:minmax(0,1fr);flex:none}
+    .reel .ph{height:auto;width:min(100%,340px)}
+    .sound{padding:8px 14px;font-size:12px}
+    .sound::after{content:"";position:absolute;inset:-6px -4px}
+    .svc-row .ph,.gal-grid .ph{flex:none;height:46svh}
+    .gal-big .ph{flex:none;height:62svh}
+    .gal-grid.c3{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .gal-grid.c3 .ph{height:34svh}
+    .toc a{font-size:14px;padding:12px 0}
+    .lnk{padding:12px 0;font-size:13px;background-position:0 calc(100% - 9px)}
+    .svc .facts{grid-template-columns:minmax(0,1fr)}
+    .svc .facts dt{border-bottom:0;padding-bottom:0}
+    .svc .facts dt,.svc .facts dd{font-size:13px}
+    .vid .play{width:60px;height:60px;margin:-30px 0 0 -30px}
+  }
+</style>
+</head>
+<body>
+
+<!-- Åpning: hva vi gjør, med innholdsfortegnelse -->
+<section class="spread" id="s0">
+ <div class="sheet">
+  <nav class="menu"><a href="./#s2">Fotografene</a><a href="tjenester.html" aria-current="page">Tjenester</a><a href="https://kvitberg.github.io/somethings-on-the-wall/">Kjøp bilder</a><a href="https://kvitberg.github.io/omradebilder/">Områdebilder</a><a data-go="kontakt">Kontakt</a><a class="more" data-go="kontakt">Meny</a><a class="pill" href="https://kvitberg.github.io/fotostallen-booking/">Book fotograf</a></nav>
+  <div class="page l">
+    <a href="./" aria-label="Til forsiden"><img class="mark" src="img/fs_logo_red_rgb.png" alt="Fotostallen"></a>
+    <a class="run sc" href="./" style="left:calc(var(--pad) + 48px);top:28px">fotostallen</a>
+    <div class="push">
+      <div class="kick sc">Tjenester</div>
+      <h1 data-split>Bolig, film og <em>alt imellom</em>.</h1>
+      <p class="lead" data-lines>Vi fotograferer og filmer for meglere, interiørarkitekter, bedrifter og merkevarer. Her er det vi gjør oftest, med bilder og filmer fra oppdragene våre.</p>
+      <nav class="toc" aria-label="Tjenestene">
+        <a data-go="bolig"><span class="n">01</span><span class="t">Boligfoto</span><span class="arr">→</span></a>
+        <a data-go="interior"><span class="n">02</span><span class="t">Interiør og arkitektur</span><span class="arr">→</span></a>
+        <a data-go="film"><span class="n">03</span><span class="t">Film og reklame</span><span class="arr">→</span></a>
+        <a data-go="drone"><span class="n">04</span><span class="t">Drone</span><span class="arr">→</span></a>
+        <a data-go="portrett"><span class="n">05</span><span class="t">Portrett</span><span class="arr">→</span></a>
+        <a data-go="bedrift"><span class="n">06</span><span class="t">Bedrift og merkevare</span><span class="arr">→</span></a>
+        <a data-go="landskap"><span class="n">07</span><span class="t">Landskap og reise</span><span class="arr">→</span></a>
+        <a data-go="tillegg"><span class="n">08</span><span class="t">Tillegg</span><span class="arr">→</span></a>
+      </nav>
+    </div>
+    <div class="pn">1</div>
+  </div>
+  <div class="page r s-hero">
+    <div class="ph focus" style="--d:.35s"><img src="img/henrik-692.jpg" alt="Lys stue under skråtak med takvindu og sofa"></div>
+    <div class="caprow"><div class="cap sc"><b><span class="n">01.</span> Interiør</b>Stue under skråtak<br>Foto: Henrik Eriksen</div></div>
+    <div class="pn">2</div>
+  </div>
+ </div>
+</section>
+
+<!-- 01 Boligfoto -->
+<section class="spread" id="bolig">
+ <div class="sheet">
+  <div class="page l bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/IMG_9996-HDR.jpg" alt="Spisestue med rundt bord"></div>
+    <div class="cap sc bleed-cap">Foto: Lars Petter Skillestad</div>
+  </div>
+  <div class="page r svc">
+    <div class="run sc">boligfoto</div>
+    <div class="kick sc">01 · Boligfoto</div>
+    <h2 class="h3" data-split>Leiligheter, hus og <em>hytter</em>.</h2>
+    <p class="svc-p" data-lines>Vi fotograferer boliger for salg, på dagtid eller kveldstid. Bildene er klare innen 48 timer, eller innen 12 timer om det haster. Drone, plantegning, områdebilder og en kort film til sosiale medier kan legges til.</p>
+    <div class="svc-row">
+      <figure><div class="ph" style="--d:.35s"><img src="img/1L7A2717-HDR.jpg" alt="Bad med lyseblå fliser under takvindu"></div><figcaption class="cap sc"><b><span class="n">02.</span> Bolig</b>Bad under takvindu<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.5s"><img src="img/scott-005-40.jpg" alt="Hyttestue med vinduer mot snødekte fjell i blå time"></div><figcaption class="cap sc"><b><span class="n">03.</span> Kveld</b>Hytte med fjellutsikt<br>Foto: Scott Kvitberg</figcaption></figure>
+    </div>
+    <div class="svc-cta"><a class="pill" href="https://kvitberg.github.io/fotostallen-booking/">Book fotograf</a><a class="lnk" href="https://fotostallen.no/forberedelser">Forberedelser til foto</a></div>
+    <div class="pn">4</div>
+  </div>
+ </div>
+</section>
+
+<!-- 01 Boligfoto, flere bilder -->
+<section class="spread" id="bolig-flere">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">boligfoto · flere bilder</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/image_part_001.jpeg" alt="Inngangsparti med rød dør"></div><figcaption class="cap sc"><b><span class="n">04.</span> Bolig</b>Inngang med rød dør<br>Foto: Kevin Fauske</figcaption></figure>
+    <div class="pn">5</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">boligfoto · flere bilder</div>
+    <div class="gal-grid">
+      <figure><div class="ph" style="--d:.3s"><img src="img/scott-00210-30.jpg" alt="Lys stue med rundt spisebord og hvit sofa"></div><figcaption class="cap sc"><b><span class="n">05.</span> Bolig</b>Stue med rundt bord<br>Foto: Scott Kvitberg</figcaption></figure>
+      <figure><div class="ph" style="--d:.4s"><img src="img/henrik-864.jpg" alt="Soverom med lys sengetøy og bilder på veggen"></div><figcaption class="cap sc"><b><span class="n">06.</span> Bolig</b>Soverom<br>Foto: Henrik Eriksen</figcaption></figure>
+      <figure><div class="ph" style="--d:.5s"><img src="img/spisestue02.jpg" alt="Spisebord mot grå vegg"></div><figcaption class="cap sc"><b><span class="n">07.</span> Interiør</b>Spisestue, grå vegg<br>Foto: Scott Kvitberg</figcaption></figure>
+      <figure><div class="ph" style="--d:.6s"><img src="img/scott-00210-38.jpg" alt="Kjøkken med grå fronter og kjøkkenøy"></div><figcaption class="cap sc"><b><span class="n">08.</span> Bolig</b>Kjøkken<br>Foto: Scott Kvitberg</figcaption></figure>
+    </div>
+    <div class="pn">6</div>
+  </div>
+ </div>
+</section>
+
+<!-- 01 Boligfoto: Oscars gate 3B (Kristine) -->
+<section class="spread" id="bolig-oscars">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">boligfoto · oscars gate 3b</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/kristine-oscars-9826.jpg" alt="Gul gang med utsikt inn til spisestua"></div><figcaption class="cap sc"><b><span class="n">09.</span> Bolig</b>Oscars gate 3B, gangen<br>Foto: Kristine Elvemo</figcaption></figure>
+    <div class="pn">7</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">boligfoto · oscars gate 3b</div>
+    <div class="gal-grid c3">
+      <figure><div class="ph" style="--d:0.3s"><img src="img/kristine-oscars-9755.jpg" alt="Rosa stue med sofa"></div><figcaption class="cap sc"><b><span class="n">10.</span> Bolig</b>Stua<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.38s"><img src="img/kristine-oscars-9763.jpg" alt="Spisebord med blomster i rosa rom"></div><figcaption class="cap sc"><b><span class="n">11.</span> Bolig</b>Spisebordet<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.46s"><img src="img/kristine-oscars-9773.jpg" alt="Kjøkken med sorte fronter og rosa vegg"></div><figcaption class="cap sc"><b><span class="n">12.</span> Bolig</b>Kjøkkenet<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.54s"><img src="img/kristine-oscars-9890.jpg" alt="Soverom med grønne vegger"></div><figcaption class="cap sc"><b><span class="n">13.</span> Bolig</b>Soverommet<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.62s"><img src="img/kristine-oscars-9743.jpg" alt="Vinduskrok med rød dør og kunst"></div><figcaption class="cap sc"><b><span class="n">14.</span> Bolig</b>Vinduskroken<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.7s"><img src="img/kristine-oscars-9611.jpg" alt="Blomster på et bord"></div><figcaption class="cap sc"><b><span class="n">15.</span> Detalj</b>Blomster på bordet<br>Foto: Kristine Elvemo</figcaption></figure>
+    </div>
+    <div class="pn">8</div>
+  </div>
+ </div>
+</section>
+
+<!-- 01 Boligfoto: Kjølberggata (Kristine) -->
+<section class="spread" id="bolig-kjolberg">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">boligfoto · kjølberggata</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/kristine-kjolberg-7135.jpg" alt="Kjøkken med spisebord, lampe og vindu"></div><figcaption class="cap sc"><b><span class="n">16.</span> Bolig</b>Kjølberggata, kjøkkenet<br>Foto: Kristine Elvemo</figcaption></figure>
+    <div class="pn">9</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">boligfoto · kjølberggata</div>
+    <div class="gal-grid">
+      <figure class="span"><div class="ph" style="--d:0.3s"><img src="img/kristine-kjolberg-7088.jpg" alt="Lys stue med blå sofa og planter"></div><figcaption class="cap sc"><b><span class="n">17.</span> Bolig</b>Stua med blå sofa<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.45s"><img src="img/kristine-kjolberg-7076.jpg" alt="Hvitt kjøkken med spisebord"></div><figcaption class="cap sc"><b><span class="n">18.</span> Bolig</b>Kjøkken og spisebord<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.6s"><img src="img/kristine-kjolberg-7151.jpg" alt="Hjørne med vegglampe ved vinduet"></div><figcaption class="cap sc"><b><span class="n">19.</span> Bolig</b>Ved vinduet<br>Foto: Kristine Elvemo</figcaption></figure>
+    </div>
+    <div class="pn">10</div>
+  </div>
+ </div>
+</section>
+
+<!-- 02 Interiør og arkitektur (speilvendt) -->
+<section class="spread" id="interior">
+ <div class="sheet">
+  <div class="page l svc">
+    <div class="run sc">interiør og arkitektur</div>
+    <div class="kick sc">02 · Interiør og arkitektur</div>
+    <h2 class="h3" data-split>Hjem, hoteller og <em>kontorer</em>.</h2>
+    <p class="svc-p" data-lines>Vi fotograferer prosjekter for interiørarkitekter og arkitekter. Kevin og Kristine jobber mest med dette, og Kevin bruker både analoge og digitale kameraer.</p>
+    <div class="svc-row">
+      <figure><div class="ph" style="--d:.35s"><img src="img/R1-09413-0006.jpg" alt="Bølgende fasade i perforert metall"></div><figcaption class="cap sc"><b><span class="n">20.</span> Arkitektur</b>Fasade<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.5s"><img src="img/scott-003061-31.jpg" alt="Spisestue under skråtak med takvinduer"></div><figcaption class="cap sc"><b><span class="n">21.</span> Interiør</b>Spisestue med takvinduer<br>Foto: Scott Kvitberg</figcaption></figure>
+    </div>
+    <div class="svc-cta"><a class="pill" data-go="kontakt">Be om tilbud</a></div>
+    <div class="pn">11</div>
+  </div>
+  <div class="page r bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/1L7A9856.jpg" alt="Stue med peoner og stearinlys"></div>
+    <div class="cap sc bleed-cap">Foto: Kevin Fauske</div>
+  </div>
+ </div>
+</section>
+
+<!-- 02 Interiør og arkitektur, flere bilder -->
+<section class="spread" id="interior-flere">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">interiør og arkitektur · flere bilder</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/1L7A0422-HDR.jpg" alt="Hotellrom med kirsebærtre"></div><figcaption class="cap sc"><b><span class="n">22.</span> Interiør</b>Hotellrom med kirsebærtre<br>Foto: Kevin Fauske</figcaption></figure>
+    <div class="pn">13</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">interiør og arkitektur · flere bilder</div>
+    <div class="gal-grid">
+      <figure class="span"><div class="ph" style="--d:.3s"><img src="img/kevin-dsc07687-hdr.jpg" alt="Overbygd terrasse med langbord foran et åpent kjøkken"></div><figcaption class="cap sc"><b><span class="n">23.</span> Arkitektur</b>Overbygd terrasse<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.45s"><img src="img/kontor03.jpg" alt="Arbeidsplass med hvit stol og lampe mot rosa vegg"></div><figcaption class="cap sc"><b><span class="n">24.</span> Interiør</b>Kontor<br>Foto: Scott Kvitberg</figcaption></figure>
+      <figure><div class="ph" style="--d:.6s"><img src="img/kevin-6f7a6205.jpg" alt="Bygg ved fjorden i solnedgang, med en person på stranden" style="object-position:55% 50%"></div><figcaption class="cap sc"><b><span class="n">25.</span> Arkitektur</b>Ved fjorden<br>Foto: Kevin Fauske</figcaption></figure>
+    </div>
+    <div class="pn">14</div>
+  </div>
+ </div>
+</section>
+
+<!-- 02 Arkitektur: Rabothytta (Kristine) -->
+<section class="spread" id="interior-rabot">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">arkitektur · rabothytta</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/kristine-rabot-dji_0848.jpg" alt="Rabothytta på fjellet sett fra drone i solnedgang"></div><figcaption class="cap sc"><b><span class="n">26.</span> Arkitektur</b>Rabothytta fra lufta<br>Foto: Kristine Elvemo</figcaption></figure>
+    <div class="pn">15</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">arkitektur · rabothytta</div>
+    <div class="gal-grid">
+      <figure class="span"><div class="ph" style="--d:.3s"><img src="img/kristine-rabot-8z8a0364.jpg" alt="Rabothytta på fjellet i kveldssol"></div><figcaption class="cap sc"><b><span class="n">27.</span> Arkitektur</b>Rabothytta i kveldssol<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.45s"><img src="img/kristine-rabot-8z8a0445-hdr.jpg" alt="Inne i Rabothytta, med trapp og røde stoler ved vinduet"></div><figcaption class="cap sc"><b><span class="n">28.</span> Interiør</b>Inne i hytta<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.6s"><img src="img/kristine-rabot-8z8a0418.jpg" alt="Fasade med vinduer mot fjellet"></div><figcaption class="cap sc"><b><span class="n">29.</span> Arkitektur</b>Fasaden<br>Foto: Kristine Elvemo</figcaption></figure>
+    </div>
+    <div class="pn">16</div>
+  </div>
+ </div>
+</section>
+
+<!-- 02 Interiør: mørk stemning (Scott) -->
+<section class="spread" id="interior-mork">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">interiør · mørk stemning</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/scott-00332-25.jpg" alt="Mørk vegg med en stripe lys og en døråpning"></div><figcaption class="cap sc"><b><span class="n">30.</span> Interiør</b>Lys i veggen<br>Foto: Scott Kvitberg</figcaption></figure>
+    <div class="pn">17</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">interiør · mørk stemning</div>
+    <div class="gal-grid">
+      <figure><div class="ph" style="--d:0.3s"><img src="img/scott-00332-32.jpg" alt="Gang med vegglamper og hylle"></div><figcaption class="cap sc"><b><span class="n">31.</span> Interiør</b>Gang med vegglamper<br>Foto: Scott Kvitberg</figcaption></figure>
+      <figure><div class="ph" style="--d:0.45s"><img src="img/scott-00332-33.jpg" alt="Inngangsparti med varmt lys"></div><figcaption class="cap sc"><b><span class="n">32.</span> Interiør</b>Inngangsparti<br>Foto: Scott Kvitberg</figcaption></figure>
+    </div>
+    <div class="pn">18</div>
+  </div>
+ </div>
+</section>
+
+<!-- 03 Film og reklame -->
+<section class="spread" id="film">
+ <div class="sheet">
+  <div class="page l bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/glenn-janus-3358.jpg" alt="Person som måker snø ved en hytte i snøstorm" style="object-position:40% 50%"></div>
+    <div class="cap sc bleed-cap">Foto: Glenn Pettersen, for Janus</div>
+  </div>
+  <div class="page r svc">
+    <div class="run sc">film og reklame</div>
+    <div class="kick sc">03 · Film og reklame</div>
+    <h2 class="h3" data-split>Kort film og <em>reklamefilm</em>.</h2>
+    <p class="svc-p" data-lines>Alle hos oss filmer. Vi lager korte, vertikale filmer på 15 til 30 sekunder til sosiale medier, og filmer på rundt ett minutt til nettsider og annonser. Glenn har laget reklamefilm for blant andre Devold og Janus.</p>
+    <div class="svc-row">
+      <figure><div class="ph" style="--d:.35s"><img src="img/glenn-janus-3284.jpg" alt="Eldre mann i ullgenser ved et stearinlys i en hytte"></div><figcaption class="cap sc"><b><span class="n">33.</span> Reklame</b>Janus: ved hyttebordet<br>Foto: Glenn Pettersen</figcaption></figure>
+      <figure><div class="ph" style="--d:.5s"><img src="img/glenn-kleveland-3763.jpg" alt="Studioportrett av en mann i genser, med bevegelsesuskarphet" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">34.</span> Reklame</b>Janus: studioportrett<br>Foto: Glenn Pettersen</figcaption></figure>
+    </div>
+    <div class="svc-cta"><a class="pill" data-go="kontakt">Be om tilbud</a><a class="lnk" data-go="filmer">Se filmene våre ↓</a></div>
+    <div class="pn">20</div>
+  </div>
+ </div>
+</section>
+
+<!-- 03 SoMe og reels -->
+<section class="spread" id="filmer">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">filmer</div>
+    <div class="kick sc">03 · SoMe og reels</div>
+    <h2 class="h3" data-split>Filmer til <em>sosiale medier</em>.</h2>
+    <p class="svc-p" data-lines>Korte filmer til sosiale medier. De spilles av uten lyd mens du ser på dem. Trykk «Lyd på» for å høre.</p>
+    <div class="reel">
+      <div class="ph" style="--d:.35s"><video class="reel-v" src="img/magnus-gate-some.mp4" poster="img/magnus-gate-some.jpg" muted loop playsinline preload="none" aria-label="SoMe-film fra en loftsleilighet i Magnus gate"></video></div>
+      <div class="reel-side">
+        <div class="cap sc"><b><span class="n">F1.</span> SoMe-film</b>Magnus gate<br>14 sekunder, stående til Reels og TikTok</div>
+        <button class="sound" type="button" aria-pressed="false">Lyd på</button>
+      </div>
+    </div>
+    <div class="pn">21</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">filmer</div>
+    <div class="reel solo">
+      <div class="ph" style="--d:.35s;--ar:4/5"><video class="reel-v" src="img/kevin-reel.mp4" poster="img/kevin-reel.jpg" muted loop playsinline preload="none" aria-label="Kevin fotograferer på mellomformat-film, bak kamera"></video></div>
+      <div class="reel-side">
+        <div class="cap sc"><b><span class="n">F2.</span> Reel</b>Bak kamera med Kevin<br>47 sekunder, til Instagram</div>
+        <button class="sound" type="button" aria-pressed="false">Lyd på</button>
+      </div>
+    </div>
+    <div class="pn">22</div>
+  </div>
+ </div>
+</section>
+
+<!-- 03 Boligfilmer fra YouTube-kanalen -->
+<section class="spread" id="youtube">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">filmer</div>
+    <div class="kick sc">03 · Boligfilmer</div>
+    <h2 class="h3" data-split>Boligfilm og <em>bak kamera</em>.</h2>
+    <p class="svc-p" data-lines>Trykk på en film for å spille den av. Flere filmer ligger på YouTube-kanalen vår.</p>
+      <figure class="film-feature"><div class="ph" style="--d:.25s"><button class="vid" type="button" data-yt="st6HS0tUs-M" aria-label="Spill av: Odins gate 23"><img src="img/yt-st6HS0tUs-M.jpg" alt=""><span class="play"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="#fff"/></svg></span></button></div><figcaption class="cap sc"><b><span class="n">F3.</span> Boligfilm</b>Odins gate 23</figcaption></figure>
+    <div class="svc-cta"><a class="lnk" href="https://youtube.com/channel/UCEjgnii2mcuY_K7Lr6Wvkpg">Alle filmene på YouTube</a></div>
+    <div class="pn">23</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">filmer</div>
+    <div class="film-grid g4">
+      <figure><div class="ph" style="--d:.35s"><button class="vid" type="button" data-yt="hnYQvvPdVQo" aria-label="Spill av: Gullhaug torg 2C"><img src="img/yt-hnYQvvPdVQo.jpg" alt=""><span class="play"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="#fff"/></svg></span></button></div><figcaption class="cap sc"><b><span class="n">F4.</span> Boligfilm</b>Gullhaug torg 2C</figcaption></figure>
+      <figure><div class="ph" style="--d:.45s"><button class="vid" type="button" data-yt="oadi2nmo5uw" aria-label="Spill av: Lanternen"><img src="img/yt-oadi2nmo5uw.jpg" alt=""><span class="play"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="#fff"/></svg></span></button></div><figcaption class="cap sc"><b><span class="n">F5.</span> Boligfilm</b>Lanternen</figcaption></figure>
+      <figure><div class="ph" style="--d:.55s"><button class="vid" type="button" data-yt="6_LNUUVdq5U" aria-label="Spill av: Strupa 3, Hemsedal"><img src="img/yt-6_LNUUVdq5U.jpg" alt=""><span class="play"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="#fff"/></svg></span></button></div><figcaption class="cap sc"><b><span class="n">F6.</span> Hyttefilm</b>Strupa 3, Hemsedal</figcaption></figure>
+      <figure><div class="ph" style="--d:.65s"><button class="vid" type="button" data-yt="NkLEOcpeOSw" aria-label="Spill av: Glenn forteller om en shoot med Jørgine Vasstrand"><img src="img/yt-NkLEOcpeOSw.jpg" alt=""><span class="play"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="#fff"/></svg></span></button></div><figcaption class="cap sc"><b><span class="n">F7.</span> Bak kamera</b>Glenn om en shoot med Jørgine Vasstrand</figcaption></figure>
+    </div>
+    <div class="pn">24</div>
+  </div>
+ </div>
+</section>
+
+<!-- 04 Drone (speilvendt) -->
+<section class="spread" id="drone">
+ <div class="sheet">
+  <div class="page l svc">
+    <div class="run sc">drone</div>
+    <div class="kick sc">04 · Drone</div>
+    <h2 class="h3" data-split>Fra <em>lufta</em>.</h2>
+    <p class="svc-p" data-lines>Med drone får du med beliggenhet, tomt og utsikt. Vi tar dronebilder og dronefilm, både til boligsalg og til andre oppdrag. Flere av oss flyr drone.</p>
+    <div class="svc-row">
+      <figure><div class="ph" style="--d:.35s"><img src="img/henrik-0146.jpg" alt="Solnedgang over sjøen sett fra drone"></div><figcaption class="cap sc"><b><span class="n">35.</span> Drone</b>Solnedgang over sjøen<br>Foto: Henrik Eriksen</figcaption></figure>
+      <figure><div class="ph" style="--d:0.5s"><img src="img/kristine-dji-0866.jpg" alt="Vei som slynger seg gjennom høstskog, sett fra drone"></div><figcaption class="cap sc"><b><span class="n">36.</span> Drone</b>Vei gjennom høstskog<br>Foto: Kristine Elvemo</figcaption></figure>
+    </div>
+    <div class="svc-cta"><a class="pill" href="https://kvitberg.github.io/fotostallen-booking/">Book fotograf</a></div>
+    <div class="pn">25</div>
+  </div>
+  <div class="page r bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/LPS_redigert_-4.jpg" alt="Vei gjennom snødekt skog sett fra drone"></div>
+    <div class="cap sc bleed-cap">Foto: Lars Petter Skillestad</div>
+  </div>
+ </div>
+</section>
+
+<!-- 05 Portrett -->
+<section class="spread" id="portrett">
+ <div class="sheet">
+  <div class="page l bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/GlennP_14.jpg" alt="Portrett av en kvinne med lyst hår i vinden" style="object-position:50% 30%"></div>
+    <div class="cap sc bleed-cap">Foto: Glenn Pettersen</div>
+  </div>
+  <div class="page r svc">
+    <div class="run sc">portrett</div>
+    <div class="kick sc">05 · Portrett</div>
+    <h2 class="h3" data-split>Folk foran <em>kamera</em>.</h2>
+    <p class="svc-p" data-lines>Vi tar portretter i studio og ute, digitalt og på film, for bedrifter og merkevarer. Portrettene av fotografene våre er tatt av Kevin og Kristine.</p>
+    <div class="svc-row" style="--n:3">
+      <figure><div class="ph" style="--d:.35s"><img src="img/DSCF9187-Edit.jpg" alt="Portrett av en mann uten skjorte, med kjede, mot blå himmel" style="object-position:50% 25%"></div><figcaption class="cap sc"><b><span class="n">37.</span> Portrett</b>Mot himmelen<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.45s"><img src="img/P400_GA645_DavidTrunk_12.jpg" alt="Mann i frakk på gaten, med trikk i bakgrunnen" style="object-position:50% 35%"></div><figcaption class="cap sc"><b><span class="n">38.</span> Portrett · film</b>På gaten<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.55s"><img src="img/Romlab_p800_10.jpg" alt="Kvinne med armene i kors i en døråpning" style="object-position:50% 35%"></div><figcaption class="cap sc"><b><span class="n">39.</span> Portrett · film</b>I døråpningen<br>Foto: Kevin Fauske</figcaption></figure>
+    </div>
+    <div class="svc-cta"><a class="pill" data-go="kontakt">Be om tilbud</a></div>
+    <div class="pn">28</div>
+  </div>
+ </div>
+</section>
+
+<!-- 05 Portrett, flere bilder -->
+<section class="spread" id="portrett-flere">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">portrett · flere bilder</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/GP_DO2_2W7A3253.jpg" alt="Portrett av en smilende mann i sykkeltrøye" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">40.</span> Portrett</b>Portrett<br>Foto: Glenn Pettersen</figcaption></figure>
+    <div class="pn">29</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">portrett · flere bilder</div>
+    <div class="gal-grid c3">
+      <figure><div class="ph" style="--d:.3s"><img src="img/Kristine_Kevin_Fauske.jpg" alt="Kristine Elvemo" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">41.</span> Film</b>Kristine Elvemo<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.38s"><img src="img/Kevin_portrett.jpg" alt="Kevin Fauske" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">42.</span> Film</b>Kevin Fauske<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:.46s"><img src="img/LP_portrett.jpg" alt="Lars Petter Skillestad" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">43.</span> Film</b>Lars Petter Skillestad<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.54s"><img src="img/Helene_portrett.jpg" alt="Helene Stenseth" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">44.</span> Film</b>Helene Stenseth<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.62s"><img src="img/Image_2_5.jpg" alt="Glenn Pettersen" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">45.</span> Film</b>Glenn Pettersen<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:.7s"><img src="img/Image_2.jpg" alt="Scott Kvitberg" style="object-position:50% 30%"></div><figcaption class="cap sc"><b><span class="n">46.</span> Film</b>Scott Kvitberg<br>Foto: Kristine Elvemo</figcaption></figure>
+    </div>
+    <div class="pn">30</div>
+  </div>
+ </div>
+</section>
+
+<!-- 06 Bedrift og merkevare -->
+<section class="spread" id="bedrift">
+ <div class="sheet">
+  <div class="page l bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/kevin-1l7a4949.jpg" alt="Myk oransje form mot grå vegg"></div>
+    <div class="cap sc bleed-cap">Foto: Kevin Fauske</div>
+  </div>
+  <div class="page r svc">
+    <div class="run sc">bedrift og merkevare</div>
+    <div class="kick sc">06 · Bedrift og merkevare</div>
+    <h2 class="h3" data-split>Produkt og <em>reportasje</em>.</h2>
+    <p class="svc-p" data-lines>Vi tar produktbilder, reportasjer og portretter for bedrifter og merkevarer. En fast pakke er opptil ti bilder og en kort reel på rundt 30 sekunder. Vår erfaring er at bilder og en kort reel sammen gir mest engasjement i sosiale medier.</p>
+    <div class="svc-row">
+      <figure><div class="ph" style="--d:.35s"><img src="img/6L9A2189.jpg" alt="Reportasje"></div><figcaption class="cap sc"><b><span class="n">47.</span> Reportasje</b>Reportasje<br>Foto: Lars Petter Skillestad</figcaption></figure>
+      <figure><div class="ph" style="--d:.5s"><img src="img/henrik-998.jpg" alt="Seilbåt i fart med vannsprut i forgrunnen" style="object-position:60% 50%"></div><figcaption class="cap sc"><b><span class="n">48.</span> Sport</b>Seiling<br>Foto: Henrik Eriksen</figcaption></figure>
+    </div>
+    <div class="svc-cta"><a class="pill" data-go="kontakt">Be om tilbud</a></div>
+    <div class="pn">32</div>
+  </div>
+ </div>
+</section>
+
+<!-- 06 Bedrift og merkevare, flere bilder -->
+<section class="spread" id="bedrift-flere">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">bedrift og merkevare · flere bilder</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/kevin-romlab-p800-16.jpg" alt="Gruppe rundt et stort bord foran en bokvegg"></div><figcaption class="cap sc"><b><span class="n">49.</span> Reportasje · film</b>Romlab<br>Foto: Kevin Fauske</figcaption></figure>
+    <div class="pn">33</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">bedrift og merkevare · flere bilder</div>
+    <div class="gal-grid">
+      <figure><div class="ph" style="--d:0.3s"><img src="img/kevin-1l7a3778.jpg" alt="To personer i møte ved et bord i et lyst rom"></div><figcaption class="cap sc"><b><span class="n">50.</span> Reportasje</b>Arbeidsmøte<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:0.4s"><img src="img/kevin-1l7a3764.jpg" alt="Hender over materialprøver og fargekart"></div><figcaption class="cap sc"><b><span class="n">51.</span> Reportasje</b>Materialprøver<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:0.5s"><img src="img/kevin-romlab-p400-2.jpg" alt="Person på et kontor med prøver på bordet"></div><figcaption class="cap sc"><b><span class="n">52.</span> Reportasje · film</b>På kontoret<br>Foto: Kevin Fauske</figcaption></figure>
+      <figure><div class="ph" style="--d:0.6s"><img src="img/kristine-hapimag-6.jpg" alt="Treningsrom på hotell med utsikt mot palmer"></div><figcaption class="cap sc"><b><span class="n">53.</span> Hotell</b>Hapimag, Spania<br>Foto: Kristine Elvemo</figcaption></figure>
+    </div>
+    <div class="pn">34</div>
+  </div>
+ </div>
+</section>
+
+<!-- 07 Landskap og reise -->
+<section class="spread" id="landskap">
+ <div class="sheet">
+  <div class="page l bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/kristine-take-skog.jpg" alt="Tåke over skog og fjell i morgenlys"></div>
+    <div class="cap sc bleed-cap">Foto: Kristine Elvemo</div>
+  </div>
+  <div class="page r svc">
+    <div class="run sc">landskap og reise</div>
+    <div class="kick sc">07 · Landskap og reise</div>
+    <h2 class="h3" data-split>Ute i <em>naturen</em>.</h2>
+    <p class="svc-p" data-lines>Når vi ikke fotograferer boliger og folk, er mange av oss ute med kameraet, hjemme og på reise. Scott selger noen av landskapsbildene sine som print hos Somethings on the wall.</p>
+    <div class="svc-row" style="--n:3">
+      <figure><div class="ph" style="--d:0.35s"><img src="img/kristine-hytte-sno.jpg" alt="Hytte i snødekt landskap"></div><figcaption class="cap sc"><b><span class="n">54.</span> Landskap</b>Hytte i snø<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.45s"><img src="img/kristine-rode-klipper.jpg" alt="Røde klipper under blå himmel"></div><figcaption class="cap sc"><b><span class="n">55.</span> Reise</b>Røde klipper<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.55s"><img src="img/print-aurora-lofoten.jpg" alt="Nordlys over fjell i Lofoten"></div><figcaption class="cap sc"><b><span class="n">56.</span> Landskap</b>Nordlys, Lofoten<br>Foto: Scott Kvitberg</figcaption></figure>
+    </div>
+    <div class="svc-cta"><a class="pill" href="https://kvitberg.github.io/somethings-on-the-wall/">Kjøp print</a></div>
+    <div class="pn">36</div>
+  </div>
+ </div>
+</section>
+
+<!-- 07 Landskap og reise, flere bilder -->
+<section class="spread" id="landskap-flere">
+ <div class="sheet">
+  <div class="page l">
+    <div class="run sc">landskap og reise · flere bilder</div>
+    <figure class="gal-big"><div class="ph" style="--d:.1s"><img src="img/kristine-dji-0556.jpg" alt="Grønne rismarker i terrasser sett fra drone"></div><figcaption class="cap sc"><b><span class="n">57.</span> Drone</b>Rismarker fra lufta<br>Foto: Kristine Elvemo</figcaption></figure>
+    <div class="pn">37</div>
+  </div>
+  <div class="page r">
+    <div class="run sc">landskap og reise · flere bilder</div>
+    <div class="gal-grid">
+      <figure><div class="ph" style="--d:0.3s"><img src="img/kristine-helgelandskysten.jpg" alt="Øyer og blått hav langs Helgelandskysten sett fra drone"></div><figcaption class="cap sc"><b><span class="n">58.</span> Drone</b>Helgelandskysten<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.4s"><img src="img/kristine-dji-0560.jpg" alt="Terrasser i grønne nyanser, fotografert rett ned fra drone"></div><figcaption class="cap sc"><b><span class="n">59.</span> Drone</b>Terrasser<br>Foto: Kristine Elvemo</figcaption></figure>
+      <figure><div class="ph" style="--d:0.5s"><img src="img/01-5.jpg" alt="Løve som hviler i gresset under et tre"></div><figcaption class="cap sc"><b><span class="n">60.</span> Safari</b>Løve i gresset<br>Foto: Scott Kvitberg</figcaption></figure>
+      <figure><div class="ph" style="--d:0.6s"><img src="img/kristine-iris.jpg" alt="Hund som løper i snøen" style="object-position:50% 35%"></div><figcaption class="cap sc"><b><span class="n">61.</span> Firbent</b>Iris i snøen<br>Foto: Kristine Elvemo</figcaption></figure>
+    </div>
+    <div class="pn">38</div>
+  </div>
+ </div>
+</section>
+
+<!-- 08 Tillegg (speilvendt) -->
+<section class="spread" id="tillegg">
+ <div class="sheet">
+  <div class="page l svc">
+    <div class="run sc">tillegg</div>
+    <div class="kick sc">08 · Tillegg</div>
+    <h2 class="h3" data-split>Det lille <em>ekstra</em>.</h2>
+    <p class="svc-p" data-lines>Dette kan du legge til et oppdrag.</p>
+    <dl class="facts">
+      <dt>Plantegning</dt><dd>Med eller uten oppmåling.</dd>
+      <dt>Virtuell styling</dt><dd>Møbler og interiør legges inn i tomme rom.</dd>
+      <dt>Virtuell renovering</dt><dd>Viser hvordan et rom kan se ut etter oppussing.</dd>
+      <dt>3D-illustrasjon</dt><dd>Etter avtale.</dd>
+      <dt>Områdebilder</dt><dd>Bilder av nabolaget fra vår egen portal. <a class="lnk" href="https://kvitberg.github.io/omradebilder/">Se områdebildene</a></dd>
+      <dt>Hurtiglevering</dt><dd>Bildene innen 12 timer i stedet for 48.</dd>
+    </dl>
+    <div class="svc-cta"><a class="pill" href="https://kvitberg.github.io/fotostallen-booking/">Book fotograf</a><a class="lnk" data-go="kontakt">Spør oss</a></div>
+    <div class="pn">39</div>
+  </div>
+  <div class="page r bleed">
+    <div class="ph fill" style="--d:.05s"><img src="img/kevin-sandakerveien-29j.jpg" alt="Kjøkken med åpen trapp og folk i bevegelse" style="object-position:35% 50%"></div>
+    <div class="cap sc bleed-cap">Foto: Kevin Fauske</div>
+  </div>
+ </div>
+</section>
+
+<!-- Bunntekst (samme som på forsiden) -->
+<section class="spread" id="kontakt">
+ <footer class="sheet footer">
+  <div class="f-top">
+    <div class="f-cols">
+      <div><h3 class="sc f-h">Fotostallen</h3><a href="./#s2">Fotografene</a><a href="tjenester.html">Tjenester</a><a href="https://kvitberg.github.io/somethings-on-the-wall/">Kjøp bilder</a></div>
+      <div><h3 class="sc f-h">Bestill</h3><a href="https://kvitberg.github.io/fotostallen-booking/">Book fotograf</a><a href="https://kvitberg.github.io/omradebilder/">Områdebilder</a><a href="https://fotostallen.no/forberedelser">Forberedelser til foto</a></div>
+      <div><h3 class="sc f-h">Følg oss</h3><a href="https://www.instagram.com/fotostallen/" target="_blank" rel="noopener">Instagram @fotostallen</a><a href="https://youtube.com/channel/UCEjgnii2mcuY_K7Lr6Wvkpg">YouTube</a></div>
+      <div><h3 class="sc f-h">Kontakt</h3><a href="mailto:kontakt@fotostallen.no">kontakt@<wbr>fotostallen.no</a><span>Oslo</span></div>
+    </div>
+    <form class="contact" novalidate>
+      <h3 class="sc f-h">Send oss en melding</h3>
+      <label><span>Navn *</span><input name="navn" autocomplete="name" required aria-describedby="feil-navn"></label>
+      <span class="err" id="feil-navn"></span>
+      <label><span>E-post *</span><input name="epost" type="email" autocomplete="email" required aria-describedby="feil-epost"></label>
+      <span class="err" id="feil-epost"></span>
+      <label><span>Melding *</span><textarea name="melding" rows="2" required placeholder="Hva trenger du bilder av?" aria-describedby="feil-melding"></textarea></label>
+      <span class="err" id="feil-melding"></span>
+      <div class="send-row"><button class="pill" type="submit">Send →</button><span class="form-note">* må fylles ut</span><span class="form-status" role="status" aria-live="polite"></span></div>
+    </form>
+    <div class="f-legal"><small>© 2026 Fotostallen AS</small><small><a href="https://kvitberg.github.io/fotostallen-booking/">Book fotograf</a><a data-go="s0">Til toppen ↑</a></small></div>
+  </div>
+  <div class="f-band">
+    <h2 class="f-tag" aria-label="Skal vi ta bilder av leiligheten din, hytta, kontoret, sjefen eller katten?">
+      <span class="f-lead" data-split aria-hidden="true">Skal vi ta bilder av</span>
+      <span class="slot" aria-hidden="true"><span class="slot-reel"><span>leiligheten din?</span><span>hytta?</span><span>kontoret?</span><span>sjefen?</span><span>katten?</span></span></span>
+      <span class="f-aside" aria-hidden="true">(Den må sitte stille.)</span>
+    </h2>
+    <img class="f-word" src="img/fs_wordmark_red.png" alt="Fotostallen">
+    <button class="slot-pause" type="button">Pause</button>
+  </div>
+ </footer>
+</section>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wide = matchMedia('(min-width: 901px)');
+  const spreads = [...document.querySelectorAll('.spread')];
+  const sheets = spreads.map(s => s.querySelector('.sheet'));
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  // Snap-punkter: ett per oppslag (egne, fordi sticky + snap er ustabilt)
+  const sections = [...document.querySelectorAll('body > section')];
+  const markers = sections.map(() => { const m = document.createElement('div'); m.className = 'snap'; document.body.appendChild(m); return m; });
+  const topOf = i => sections.slice(0, i).reduce((sum, s) => sum + s.offsetHeight, 0); // uavhengig av sticky
+  const layout = () => sections.forEach((s, i) => { markers[i].style.top = topOf(i) + 'px'; markers[i].style.height = s.offsetHeight + 'px'; });
+  const indexOf = id => sections.findIndex(s => s.id === id);
+
+  // Ord i masker. Overskrifter: forsinkelse per ord. Avsnitt: per linje.
+  function splitWords(el) {
+    const words = [];
+    const walk = node => {
+      [...node.childNodes].forEach(n => {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach((part, k) => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+            // Punktum o.l. rett etter et ord (f.eks. etter <em>) festes til ordet
+            if (k === 0 && /^[.,:;!?…]+$/.test(part) && words.length) {
+              const cs = getComputedStyle(n.parentNode), s = document.createElement('span');
+              s.textContent = part;
+              s.style.cssText = `font-style:${cs.fontStyle};font-weight:${cs.fontWeight};color:${cs.color}`;
+              words[words.length - 1].firstChild.appendChild(s);
+              return;
+            }
+            const w = document.createElement('span'); w.className = 'w';
+            const s = document.createElement('span'); s.textContent = part;
+            w.appendChild(s); frag.appendChild(w); words.push(w);
+          });
+          n.replaceWith(frag);
+        } else if (n.nodeType === 1 && n.tagName !== 'BR') walk(n);
+      });
+    };
+    walk(el);
+    return words;
+  }
+  document.querySelectorAll('[data-split]').forEach(el => {
+    const base = parseFloat(el.dataset.base || '.2');
+    splitWords(el).forEach((w, i) => w.style.setProperty('--d', (base + i * .075) + 's'));
+  });
+  const lineEls = [...document.querySelectorAll('[data-lines]')].map(el => ({ el, words: splitWords(el) }));
+  function setLineDelays() {
+    lineEls.forEach(({ el, words }) => {
+      const base = parseFloat(el.dataset.base || '.55');
+      const tops = [];
+      words.forEach(w => { const t = w.offsetTop; if (!tops.includes(t)) tops.push(t); });
+      words.forEach(w => w.style.setProperty('--d', (base + tops.indexOf(w.offsetTop) * .09) + 's'));
+    });
+  }
+  document.querySelectorAll('.menu a').forEach((a, i) => a.style.setProperty('--i', i));
+
+  // Søkerhjørner rundt hovedbildet
+  document.querySelectorAll('.ph.focus').forEach(ph => {
+    const fx = document.createElement('div'); fx.className = 'fx';
+    ph.before(fx); fx.appendChild(ph);
+    const f = document.createElement('div'); f.className = 'fwrap';
+    f.innerHTML = '<i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i>';
+    fx.appendChild(f);
+  });
+
+  // Filmer: YouTube (uten informasjonskapsler) lastes først når man trykker
+  document.querySelectorAll('.vid').forEach(b => b.addEventListener('click', () => {
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${b.dataset.yt}?autoplay=1&rel=0`;
+    f.title = b.getAttribute('aria-label').replace('Spill av: ', '');
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    b.replaceWith(f);
+    reels.forEach(v => v.pause());
+  }));
+
+  // Reels: lastes og spilles av (uten lyd, i løkke) bare mens de er i bildet. Bare én har lyd om gangen.
+  const reels = [...document.querySelectorAll('.reel-v')];
+  const setSound = (v, on) => { v.muted = !on; const b = v.closest('.reel').querySelector('.sound'); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Lyd av' : 'Lyd på'; };
+  reels.forEach(v => {
+    if (reduce) v.controls = true;
+    else new IntersectionObserver(es => es.forEach(e => { if (e.intersectionRatio >= .5) v.play().catch(() => {}); else { v.pause(); setSound(v, false); } }), { threshold: [0, .5] }).observe(v);
+    v.closest('.reel').querySelector('.sound').addEventListener('click', () => {
+      const on = v.muted;
+      reels.forEach(o => { if (o !== v) setSound(o, false); });
+      setSound(v, on);
+      if (v.paused) v.play().catch(() => {});
+    });
+  });
+
+  // Dekoding av små tekster
+  const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ0123456789/—·+#';
+  const textNodes = el => { const out = [], tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); while (tw.nextNode()) out.push(tw.currentNode); return out; };
+  document.querySelectorAll('.sc').forEach(el => { el._nodes = textNodes(el).map(n => ({ n, txt: n.textContent })); });
+  function scramble(el, delay) {
+    clearTimeout(el._t); cancelAnimationFrame(el._raf);
+    el._t = setTimeout(() => {
+      el.classList.add('go');
+      const t0 = performance.now();
+      let offset = 0;
+      const items = el._nodes.map(o => { const it = { ...o, start: offset }; offset += o.txt.length; return it; });
+      const tick = now => {
+        const t = now - t0; let done = true;
+        items.forEach(({ n, txt, start }) => {
+          let s = '';
+          for (let i = 0; i < txt.length; i++) {
+            const c = txt[i], at = 120 + (start + i) * 16;
+            if (c === ' ' || c === ' ' || t >= at) s += c;
+            else { done = false; s += t > at - 260 ? GLYPHS[(Math.random() * GLYPHS.length) | 0] : ' '; }
+          }
+          n.textContent = s;
+        });
+        if (!done) el._raf = requestAnimationFrame(tick);
+      };
+      el._raf = requestAnimationFrame(tick);
+    }, delay);
+  }
+  function unscramble(el) { clearTimeout(el._t); cancelAnimationFrame(el._raf); el.classList.remove('go'); el._nodes.forEach(o => o.n.textContent = o.txt); }
+
+  // Når et oppslag blir synlig: spill av alt
+  function enter(s) {
+    if (s.classList.contains('in')) return;
+    s.classList.remove('out'); void s.offsetWidth; s.classList.add('in');
+    [...s.querySelectorAll('.sc')].forEach((el, i) => scramble(el, 250 + i * 70));
+  }
+  function leave(s) {
+    if (!s.classList.contains('in')) return;
+    s.classList.remove('in'); s.classList.add('out');
+    s.querySelectorAll('.sc').forEach(unscramble);
+  }
+
+  // Bunnteksten: blits og fokus på FOTOSTALLEN, så går ordene i løkke (som på forsiden)
+  const band = document.querySelector('.f-band');
+  const reel = band.querySelector('.slot-reel'), slot = band.querySelector('.slot'), aside = band.querySelector('.f-aside');
+  const pauseBtn = band.querySelector('.slot-pause');
+  const N_WORDS = reel.children.length;
+  reel.appendChild(reel.children[0].cloneNode(true));
+  const reelWords = [...reel.children];
+  const HOLD = 1000, HOLD_LAST = 2000, MOVE = 450;
+  let slotIdx = 0, slotTimer = null, hovered = false, held = false;
+  function showWord(i, instant) {
+    const w = reelWords[i];
+    if (instant) { reel.style.transition = 'none'; slot.style.transition = 'none'; }
+    reel.style.transform = `translateY(${-w.offsetTop}px)`;
+    slot.style.width = w.offsetWidth + 'px';
+    if (instant) { void reel.offsetWidth; reel.style.transition = ''; slot.style.transition = ''; }
+    aside.classList.toggle('show', i === N_WORDS - 1);
+  }
+  function schedule(first) {
+    clearTimeout(slotTimer);
+    if (hovered || held || !band.classList.contains('play')) return;
+    slotTimer = setTimeout(step, first ? 1500 : (slotIdx === N_WORDS - 1 ? HOLD_LAST : HOLD));
+  }
+  function step() {
+    slotIdx++;
+    showWord(slotIdx);
+    if (slotIdx === reelWords.length - 1) setTimeout(() => { slotIdx = 0; showWord(0, true); }, MOVE + 50);
+    schedule();
+  }
+  function playBand() {
+    band.classList.remove('play'); void band.offsetWidth; band.classList.add('play');
+    slotIdx = 0; showWord(0, true);
+    if (reduce) { showWord(N_WORDS - 1, true); return; }
+    schedule(true);
+  }
+  function resetBand() { clearTimeout(slotTimer); band.classList.remove('play'); slotIdx = 0; showWord(0, true); }
+  band.addEventListener('focusin', () => { hovered = true; clearTimeout(slotTimer); });
+  band.addEventListener('focusout', e => { if (!band.contains(e.relatedTarget)) { hovered = false; schedule(); } });
+  pauseBtn.addEventListener('click', () => {
+    held = !held;
+    pauseBtn.classList.toggle('paused', held);
+    pauseBtn.textContent = held ? 'Spill av' : 'Pause';
+    held ? clearTimeout(slotTimer) : schedule();
+  });
+  if (reduce) pauseBtn.hidden = true;
+  new IntersectionObserver(es => es.forEach(e => {
+    if (e.intersectionRatio >= .5 && !band.classList.contains('play')) playBand();
+    else if (!e.isIntersecting) resetBand();
+  }), { threshold: [0, .5] }).observe(band);
+
+  // Kontaktskjema: sjekker feltene og åpner e-post til kontakt@fotostallen.no ferdig utfylt
+  const form = document.querySelector('.contact');
+  const MSG = { navn: 'Skriv navnet ditt.', epost: 'Skriv e-postadressen din.', melding: 'Skriv en kort melding.' };
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    let first = null;
+    form.querySelectorAll('[required]').forEach(el => {
+      const v = el.value.trim();
+      let msg = '';
+      if (!v) msg = MSG[el.name];
+      else if (el.type === 'email' && !el.checkValidity()) msg = 'E-postadressen ser ikke riktig ut. Sjekk at den har @ og et domene, f.eks. navn@firma.no.';
+      el.setAttribute('aria-invalid', !!msg);
+      document.getElementById('feil-' + el.name).textContent = msg;
+      if (msg && !first) first = el;
+    });
+    const status = form.querySelector('.form-status');
+    if (first) { status.textContent = 'Sjekk feltet som er merket.'; first.focus(); return; }
+    const f = new FormData(form);
+    const body = `${f.get('melding')}\n\n${f.get('navn')}\n${f.get('epost')}`;
+    location.href = `mailto:kontakt@fotostallen.no?subject=${encodeURIComponent('Henvendelse fra nettsiden')}&body=${encodeURIComponent(body)}`;
+    status.textContent = 'E-postprogrammet ditt åpnes med meldingen ferdig utfylt. Skjer ingenting, send til kontakt@fotostallen.no.';
+  });
+  form.querySelectorAll('[required]').forEach(el => el.addEventListener('input', () => { el.removeAttribute('aria-invalid'); document.getElementById('feil-' + el.name).textContent = ''; }));
+
+  // Rulling: oppslagene legger seg oppå hverandre (bred visning) og spilles av når de kommer til syne
+  let ticking = false, ready = false;
+  function frame() {
+    ticking = false;
+    const vh = innerHeight, stack = wide.matches && !reduce;
+    spreads.forEach((s, i) => {
+      const r = s.getBoundingClientRect();
+      const next = spreads[i + 1];
+      const cover = stack && next ? clamp(1 - next.getBoundingClientRect().top / vh, 0, 1) : 0;
+      const rise = clamp((vh - r.top) / vh, 0, 1);
+      s.style.visibility = wide.matches && next && next.getBoundingClientRect().top <= .5 ? 'hidden' : '';
+      sheets[i].style.transform = cover > 0 ? `scale(${1 - cover * .075}) translateY(${-cover * 1.5}%)` : '';
+      sheets[i].style.setProperty('--cover', cover.toFixed(3));
+      sheets[i].style.setProperty('--rise', (stack && i > 0 && rise > 0 && rise < 1 ? Math.sin(rise * Math.PI) : 0).toFixed(3));
+      if (!ready) return;
+      if (rise > .06) enter(s);
+      else if (r.top >= vh - 1) leave(s);
+    });
+  }
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
+  addEventListener('resize', () => { layout(); setLineDelays(); frame(); });
+
+  // Lenker til oppslag på denne siden (data-go="bolig" osv.)
+  document.querySelectorAll('a[data-go]:not([href])').forEach(el => { el.href = '#' + el.dataset.go; });
+  document.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', e => {
+    const i = indexOf(el.dataset.go); if (i < 0) return;
+    e.preventDefault(); scrollTo({ top: topOf(i), behavior: 'smooth' });
+  }));
+
+  // Start: vent på skrift, mål linjer, vis første oppslag (ingen logo-intro på undersider)
+  sheets[0].style.transition = 'none';
+  document.fonts.ready.then(() => {
+    layout(); setLineDelays(); showWord(0, true);
+    if (reduce) spreads.forEach(s => s.classList.add('in'));
+    ready = true; frame();
+    const h = indexOf(location.hash.slice(1));
+    if (h > 0) setTimeout(() => scrollTo({ top: topOf(h) }), 100);
+  });
+})();
+</script>
+</body>
+</html>

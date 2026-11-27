@@ -1,0 +1,397 @@
+/* Felles stil for Fotoboka-skissen (forsiden og tjenestesiden) */
+:root{
+  --rosa:#ffdee2;--rod:#e64549;--svart:#010102;--papir:#fffdfc;--gra:#6b6467;
+  --ease:cubic-bezier(.2,.8,.1,1);      /* myk landing */
+  --curtain:cubic-bezier(.77,0,.18,1);  /* forheng */
+  /* Mål som følger vinduet, så ingenting kolliderer i mindre vinduer */
+  --edge-y:clamp(12px,1.8vw,26px);      /* rosa kant rundt arket */
+  --edge-x:clamp(14px,2vw,30px);
+  --pad:clamp(28px,3.9vw,56px);         /* marg inne på hver side */
+  --top:clamp(52px,8vh,72px);           /* plass til topptekst */
+  --bot:clamp(46px,7vh,64px);           /* plass til sidetall */
+  --body:clamp(12px,.88vw,13.5px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y mandatory;background:var(--rosa)}
+html.intro-on{overflow:hidden}
+body{background:var(--rosa);font-family:'Space Mono',monospace;color:var(--svart);font-size:var(--body);line-height:1.55;position:relative}
+a{color:inherit;text-decoration:none;cursor:pointer}
+::selection{background:var(--rod);color:#fff}
+input,textarea{caret-color:var(--rod)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--rod);outline-offset:3px;border-radius:2px}
+img{display:block}
+
+/* ---------- Snap-punkter (egne, fordi sticky + snap er ustabilt) ---------- */
+.snap{position:absolute;left:0;width:1px;height:100svh;scroll-snap-align:start;pointer-events:none}
+
+/* ---------- Oppslag som legges oppå hverandre ---------- */
+.spread{position:sticky;top:0;height:100vh;height:100svh;padding:var(--edge-y) var(--edge-x)}
+.sheet{height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:var(--papir);position:relative;
+  transform-origin:50% 40%;will-change:transform;
+  box-shadow:0 -30px 70px -30px rgba(90,20,30,calc(.35 * var(--rise,0)))}
+.sheet::after{content:"";position:absolute;inset:0;background:var(--rosa);opacity:calc(var(--cover,0) * .55);pointer-events:none;z-index:20}
+/* Hver side er en kolonne: innholdet flyter, så tekst og bilder aldri ligger oppå hverandre */
+.page{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0;min-height:0;padding:var(--top) var(--pad) var(--bot)}
+.page.bleed{padding:0}
+.push{margin-top:auto}
+
+/* ---------- Marg-elementer (ligger i margene, utenfor innholdet) ---------- */
+.run{position:absolute;top:22px;font-size:11px;letter-spacing:.04em;color:var(--gra)}
+.l .run{left:var(--pad)} .r .run{right:var(--pad)}
+.folio{position:absolute;top:50%;transform:translateY(-50%);font-size:11px;text-align:center;line-height:1.2}
+.folio i{display:block;width:14px;height:1px;background:var(--svart);margin:5px auto;transform:scaleX(0);transition:transform .8s var(--ease) .3s}
+.in .folio i{transform:scaleX(1)}
+.l .folio{left:calc(var(--pad) / 2 - 8px)} .r .folio{right:calc(var(--pad) / 2 - 8px)}
+.pn{position:absolute;bottom:18px;font-size:15px;font-weight:700;opacity:0;transform:translateY(8px);transition:opacity .6s,transform .8s var(--ease);transition-delay:.5s}
+.in .pn{opacity:1;transform:none}
+.l .pn{left:var(--pad)} .r .pn{right:var(--pad)}
+.mark{position:absolute;top:18px;left:var(--pad);width:34px}
+
+/* ---------- Meny ---------- */
+.menu{position:absolute;top:18px;right:var(--pad);display:flex;gap:clamp(12px,1.5vw,22px);align-items:center;font-size:11px;z-index:5;white-space:nowrap}
+.menu a:not(.pill){background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .45s var(--ease)}
+.menu a:not(.pill):hover{background-size:100% 1px}
+.menu a{opacity:0;transform:translateY(-6px);transition:opacity .6s,transform .8s var(--ease),background-size .45s var(--ease);transition-delay:calc(.15s + var(--i,0) * .06s)}
+.in .menu a{opacity:1;transform:none}
+.menu .more{display:none}
+.pill{position:relative;background:var(--rod);color:#fff;padding:7px 14px;border-radius:999px;transition:transform .35s var(--ease),box-shadow .35s}
+.pill:hover{transform:translateY(-2px);box-shadow:0 8px 18px -8px rgba(230,69,73,.7)}
+.pill:active,.team .ph.cta:active{transform:translateY(0) scale(.97);transition-duration:.1s}
+
+/* ---------- Typografi (skalerer med både bredde og høyde) ---------- */
+h1{font-size:clamp(34px,min(4.5vw,7.6vh),76px);line-height:1.02;font-weight:700;letter-spacing:-.03em}
+h1 em,h3 em,.h3 em{font-style:italic;font-weight:400;color:var(--rod)}
+h2{font-size:clamp(22px,min(2.2vw,4.2vh),34px);line-height:1.1;letter-spacing:-.02em}
+h3,.h3{font-size:clamp(28px,min(3.3vw,5.8vh),52px);line-height:1.04;letter-spacing:-.03em;font-weight:700}
+.lead{margin-top:18px;max-width:36ch}
+.about{max-width:46ch;margin-top:12px}
+.bio{max-width:44ch;margin-top:14px}
+.kick{color:var(--rod);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:clamp(10px,2vh,18px)}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.tags span{border:1px solid var(--rod);color:var(--rod);border-radius:999px;padding:4px 10px;font-size:11px;opacity:0;transform:translateY(10px) scale(.92);transition:opacity .5s,transform .7s var(--ease);transition-delay:calc(.9s + var(--i,0) * .08s)}
+.in .tags span{opacity:1;transform:none}
+.cap{font-size:11px;line-height:1.45}
+.cap b{display:block;font-size:11.5px}
+.cap .n{color:var(--rod)}
+.caprow{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:12px}
+.cue .arr{display:inline-block;animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(4px)}}
+.vcap{position:absolute;left:calc(var(--pad) / 2 - 7px);bottom:var(--bot);writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;line-height:1.5}
+
+/* Ord-for-ord: hvert ord ligger i en maske og glir opp */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .09em .14em 0;margin:0 -.09em -.14em 0}
+.w>span{display:inline-block;transform:translateY(108%);transition:transform 1.15s var(--ease);transition-delay:var(--d,0s)}
+.in .w>span{transform:none}
+.out .w>span{transition:none}
+
+/* Dekoding av liten tekst */
+.sc{opacity:0}
+.sc.go{opacity:1}
+
+/* ---------- Bilder: forheng nedenfra + bildet setter seg ---------- */
+.ph{position:relative;overflow:hidden;background:#efe9ea;min-height:0;min-width:0;clip-path:inset(100% 0 0 0);transition:clip-path 1.35s var(--curtain);transition-delay:var(--d,.1s)}
+.ph.fill{position:absolute;inset:0}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.2);transition:transform 2.2s var(--ease);transition-delay:var(--d,.1s)}
+.in .ph{clip-path:inset(0 0 0 0)}
+.in .ph img{transform:scale(1)}
+.in .ph:hover img{transform:scale(1.03);transition:transform 1.4s var(--ease)}
+.out .ph,.out .ph img{transition:none}
+.fx{position:relative;display:flex;min-height:0;min-width:0}
+.fx>.ph{flex:1}
+
+/* Søkerhjørner som fokuserer inn på hovedbildet */
+.fwrap{position:absolute;inset:0;pointer-events:none;z-index:4}
+.fc{position:absolute;width:28px;height:28px;border:3px solid var(--rod);opacity:0}
+.fc.tl{left:-12px;top:-12px;border-right:0;border-bottom:0;--sx:-1;--sy:-1}
+.fc.tr{right:-12px;top:-12px;border-left:0;border-bottom:0;--sx:1;--sy:-1}
+.fc.bl{left:-12px;bottom:-12px;border-right:0;border-top:0;--sx:-1;--sy:1}
+.fc.br{right:-12px;bottom:-12px;border-left:0;border-top:0;--sx:1;--sy:1}
+.in .fc{animation:focus 1.9s var(--ease) forwards;animation-delay:calc(var(--d,.1s) + .55s)}
+@keyframes focus{
+  0%{opacity:0;transform:translate(calc(var(--sx) * 46px),calc(var(--sy) * 46px))}
+  30%{opacity:1;transform:translate(calc(var(--sx) * -4px),calc(var(--sy) * -4px))}
+  40%{opacity:1;transform:translate(0,0)}
+  75%{opacity:1;transform:translate(0,0)}
+  100%{opacity:0;transform:translate(0,0)}
+}
+
+/* ---------- Oppslag 1: forsiden ---------- */
+.hero-r{padding:clamp(64px,10vh,92px) clamp(40px,7.5vw,110px) var(--bot) clamp(44px,8.5vw,120px)}
+/* Scenen: stående bilder står på høyresiden; liggende bilder får en stor flate fra under menyen
+   og innover mot overskriften (Scotts skisse). Rammen og bildeteksten plasseres av fitHero(). */
+.hero-r{overflow:visible}
+.hero-r .stage{flex:1;min-height:0;position:relative;margin:0 calc(var(--pad) - clamp(40px,7.5vw,110px)) 0 calc(var(--pad) - clamp(44px,8.5vw,120px))}
+.hero-r .fx{position:absolute;left:0;top:0;width:100%;height:100%;transition:left .9s var(--ease),top .9s var(--ease),width .9s var(--ease),height .9s var(--ease)}
+.hero-r .stage .caprow{position:absolute;left:0;bottom:0;margin:0;transition:left .9s var(--ease)}
+.hero-r .caprow{margin-top:26px}
+
+/* ---------- (tidligere arbeid-oppslaget; brukes ikke nå) ---------- */
+.pair{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,34%);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:clamp(8px,1.4vh,14px) 18px}
+.pair .c1{grid-area:1/2;align-self:start}
+.pair .c2{grid-area:2/2;align-self:end}
+
+.bleed-cap{position:absolute;left:var(--pad);bottom:18px;z-index:3;color:#fff;background:rgba(1,1,2,.6);padding:3px 8px;border-radius:2px}
+
+/* ---------- Oppslag 3: hvem vi er ---------- */
+.facts{display:grid;grid-template-columns:90px minmax(0,1fr);margin-top:clamp(18px,3vh,32px)}
+.facts::before{content:"";grid-column:1/-1;height:1px;background:var(--svart);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.1s var(--curtain) .5s}
+.in .facts::before{transform:scaleX(1)}
+.facts.push{margin-top:auto;padding-top:clamp(18px,3vh,32px)}
+.facts dt,.facts dd{padding:clamp(4px,.8vh,7px) 0;border-bottom:1px solid #e3dcdd;font-size:11px}
+.facts dt{color:var(--rod)}
+.team-page{padding-left:calc(var(--pad) + 2%);padding-right:calc(var(--pad) + 2%)}
+.team{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:clamp(8px,1.6vh,14px) clamp(10px,1.4vw,20px);position:relative}
+.team figure{display:flex;flex-direction:column;min-height:0;cursor:pointer}
+.team .ph{flex:1}
+.team .ph.none{background:var(--rosa);display:flex;align-items:center;justify-content:center;color:var(--rod);font-weight:700;font-size:18px}
+.team .ph.cta{background:var(--rod);color:#fff;display:flex;align-items:flex-end;padding:clamp(10px,1.2vw,16px);font-weight:700;font-size:clamp(12px,1.05vw,15px);line-height:1.2;transition:clip-path 1.35s var(--curtain) var(--d,.1s),background .3s}
+.team .ph.cta:hover{background:#d23238}
+.team figcaption{font-size:11px;line-height:1.35;padding-top:6px;height:36px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team figcaption span{display:block;color:var(--rod)}
+.team img{filter:saturate(.85);transition:transform 2.2s var(--ease),filter .5s}
+.team figure:hover img{filter:none}
+.team-hint{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px}
+.tcur{position:absolute;pointer-events:none;z-index:6;opacity:0;transition:left .55s var(--ease),top .55s var(--ease),width .55s var(--ease),height .55s var(--ease),opacity .4s}
+.in .tcur{opacity:1;transition-delay:0s,0s,0s,0s,1.4s}
+.tcur i{position:absolute;width:22px;height:22px;border:3px solid var(--rod)}
+.tcur i:nth-child(1){left:-8px;top:-8px;border-right:0;border-bottom:0}
+.tcur i:nth-child(2){right:-8px;top:-8px;border-left:0;border-bottom:0}
+.tcur i:nth-child(3){left:-8px;bottom:-8px;border-right:0;border-top:0}
+.tcur i:nth-child(4){right:-8px;bottom:-8px;border-left:0;border-top:0}
+
+/* ---------- Oppslag 4: fotografene som et bånd som glir sidelengs ----------
+   Seksjonen er høyere enn skjermen; arket står fast mens man ruller, og båndet
+   flyttes like langt sidelengs som man ruller nedover (som i safari-demoen). */
+.hscroll{position:relative}
+.hscroll>.spread{position:sticky;top:0}
+.hs-sheet{display:block;overflow:hidden}
+.track{position:absolute;top:0;left:0;height:100%;display:flex;align-items:center;gap:clamp(36px,5vw,80px);padding:0 max(clamp(28px,6vw,96px),calc(50vw - 26svh)) 0 clamp(28px,6vw,96px);width:max-content;will-change:transform}
+.hs-intro{flex:none;width:min(440px,78vw)}
+.hs-intro .lead{margin-top:clamp(14px,3vh,24px)}
+.hs-intro .cue{display:inline-block;margin-top:clamp(18px,3vh,28px);color:var(--rod);font-size:11px}
+.hs-intro .cue .arr{animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateX(6px)}}
+.card{flex:none;position:relative;cursor:default}
+.card:nth-of-type(odd){margin-top:7svh}
+.card .ph{height:min(55svh,540px);aspect-ratio:4/5;clip-path:inset(0 0 0 100%);transition:clip-path 1.3s var(--curtain)}
+.card.wide .ph{height:min(40svh,380px);aspect-ratio:auto;width:min(56svh,520px)}
+.card.wide.tall .ph{height:min(50svh,480px);width:auto;aspect-ratio:var(--ar,2/3)}  /* stående arbeidsbilde */
+.card .ph img{transform:scale(1.14) translateX(var(--px,0%));transition:none}
+.card.seen .ph{clip-path:inset(0 0 0 0)}
+.in .card .ph img{transform:scale(1.14) translateX(var(--px,0%))}
+.card:hover .ph img{transform:scale(1.17) translateX(var(--px,0%))}
+.card .ph.none{background:var(--rosa);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--rod);font-weight:700;font-size:40px}
+.card .ph.none small{font-size:11px;font-weight:400;color:var(--svart)}
+.group[style*="rosa"] .ph.none{background:var(--papir)}  /* plassholderen synes også på rosa blokk */
+.card figcaption{display:flex;gap:14px;align-items:baseline;margin-top:14px;max-width:min(48svh,460px)}
+.card figcaption b{font-style:italic;font-weight:400;font-size:28px;line-height:1;color:var(--rod);flex:none}
+.card .who-name{font-weight:700;font-size:13px}
+.card .who-fag{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gra);margin-top:2px}
+.card .who-bio{display:block;font-size:11px;margin-top:8px;max-width:36ch}
+.card.wide figcaption{font-size:11px;color:var(--gra)}
+.card .who-bio{opacity:0;transform:translateY(8px);transition:opacity .8s .6s,transform 1s var(--ease) .6s}
+.card.seen .who-bio{opacity:1;transform:none}
+.card .ph:hover img{transition:transform .6s var(--ease)}
+.hs-ui .run{left:var(--pad)}
+.hs-hint{position:absolute;top:22px;right:var(--pad);font-size:11px;color:var(--gra)}
+.fremdrift{position:absolute;left:clamp(28px,6vw,96px);right:clamp(28px,6vw,96px);bottom:clamp(22px,4.5vh,40px);height:1px;background:#ebe3e4}
+.fremdrift i{display:block;height:100%;background:var(--rod);transform-origin:0 50%;transform:scaleX(var(--p,0))}
+.hs-count{position:absolute;left:clamp(28px,6vw,96px);bottom:calc(clamp(22px,4.5vh,40px) + 10px);font-size:11px;color:var(--gra)}
+.hs-count b{color:var(--svart);font-weight:700}
+.hs-back{position:absolute;right:clamp(28px,6vw,96px);bottom:calc(clamp(22px,4.5vh,40px) + 10px);font-size:11px;color:var(--rod)}
+
+/* ---------- Fotografene: én fargeblokk per fotograf ---------- */
+.track{gap:0}
+.hs-intro{margin-right:clamp(36px,5vw,80px)}
+.group{flex:none;height:100%;display:flex;align-items:center;gap:clamp(28px,3.5vw,60px);padding:0 clamp(28px,4vw,70px);background:var(--g,transparent)}
+.card .who-cred{display:block;font-size:11px;color:var(--gra);margin-top:6px}
+
+/* ---------- Mobil: bilde på første skjerm ---------- */
+.mob-hero,.mob-cap{display:none}
+
+/* ---------- Bunntekst: lyst felt med lenker og skjema, rosa bånd med stort ordmerke ---------- */
+.footer{display:flex;flex-direction:column}
+.f-top{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-rows:1fr auto;gap:clamp(16px,3vh,30px) clamp(24px,4vw,64px);padding:clamp(26px,5vh,52px) var(--pad) clamp(12px,2.2vh,20px)}
+.footer .f-h{font-size:11px;line-height:1.4;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.f-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,.7fr) minmax(0,1.3fr);gap:clamp(14px,2vw,28px);align-content:start}
+.f-cols a,.f-cols span{display:block;width:fit-content;font-size:12px;line-height:1.7;padding:2px 0;max-width:100%}
+.f-cols a,.f-legal a{background:linear-gradient(currentColor,currentColor) 0 88%/0 1px no-repeat;transition:background-size .4s var(--ease)}
+.f-cols a:hover,.f-legal a:hover{background-size:100% 1px}
+.contact{display:flex;flex-direction:column;gap:8px;align-self:start}
+.contact label{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--svart);padding:4px 0;font-size:12px;transition:border-color .2s,box-shadow .2s,background .2s}
+.contact label>span{flex:none;width:78px}
+.contact input,.contact textarea{flex:1;min-width:0;font:inherit;font-size:13px;color:var(--svart);background:transparent;border:0;outline:none;padding:7px 0;resize:none}
+.contact textarea::placeholder{color:var(--gra);font-style:italic}
+.contact label:focus-within{border-bottom-color:var(--rod);box-shadow:0 2px 0 var(--rod);background:rgba(230,69,73,.06)}
+.err{display:block;min-height:0;font-size:12px;color:#b3262d;margin-top:-2px}
+.err:empty{display:none}
+.form-note{font-size:11px;color:var(--gra)}
+.contact label:has([aria-invalid=true]){border-bottom-color:var(--rod)}
+.send-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:8px}
+.send-row button{font:inherit;font-size:11px;border:0;cursor:pointer}
+.form-status{font-size:11px}
+.f-legal{grid-column:1/-1;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--gra);padding-top:12px;border-top:1px solid #ece4e5}
+.f-legal small{font-size:inherit}
+.f-legal a{display:inline-block;margin-left:18px;padding:4px 0;color:var(--svart)}
+.f-band{flex:none;position:relative;background:var(--rosa);padding:clamp(20px,4vh,40px) var(--pad) clamp(8px,1.6vh,16px);display:flex;flex-direction:column;gap:clamp(16px,5vh,56px)}
+.f-tag{font-size:clamp(28px,min(3.6vw,6.2vh),60px);font-weight:400;letter-spacing:-.03em;line-height:1.05;color:var(--rod)}
+.f-lead{display:block}
+/* Spilleautomat: ordet bytter nedover og stopper på katten */
+.slot{display:inline-block;vertical-align:bottom;overflow:hidden;height:1.14em;transition:width .4s var(--ease)}
+.slot-reel{display:flex;flex-direction:column;transition:transform .45s cubic-bezier(.34,1.3,.64,1)}
+.slot-pause{position:absolute;top:clamp(16px,3vh,32px);right:var(--pad);font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--svart);background:none;border:1px solid var(--svart);border-radius:999px;padding:6px 12px;cursor:pointer;transition:background .3s,color .3s}
+.slot-pause:hover,.slot-pause.paused{background:var(--svart);color:#fff}
+.slot-reel span{display:block;width:max-content;height:1.14em;line-height:1.14em;font-style:italic;color:var(--svart)}
+.f-aside{display:inline-block;vertical-align:middle;margin-left:.7em;font-size:max(12px,.3em);letter-spacing:0;color:var(--svart);opacity:0;transform:translateY(8px) rotate(-2deg);transition:opacity .5s,transform .7s cubic-bezier(.34,1.45,.64,1)}
+.f-aside.show{opacity:1;transform:rotate(-2deg)}
+/* Blitsglimt over båndet og ordmerket som fokuseres */
+.f-band::after{content:"";position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.f-band.play::after{animation:flash .6s ease-out .05s}
+@keyframes flash{0%{opacity:0}12%{opacity:.92}100%{opacity:0}}
+.f-word{width:100%;height:auto;filter:blur(16px);opacity:.3;transform:scale(1.02);transition:filter 1.3s var(--ease) .15s,opacity .9s ease .15s,transform 1.5s var(--ease) .15s}
+.f-band.play .f-word{filter:none;opacity:1;transform:none}
+.f-band:not(.play) .w>span{transform:translateY(108%)}
+.f-band.play .slot-reel span{opacity:1}
+
+/* ---------- Forsiden: bildebytter (nytt bilde avdekkes nedenfra over det forrige) ---------- */
+.in .rot img{clip-path:inset(0 0 0 100%);transform:scale(1.06);transition:clip-path 1s var(--curtain),transform 6s linear;transition-delay:0s}
+.in .rot[data-dir=prev] img{clip-path:inset(0 100% 0 0)}
+.in .rot img.on,.in .rot img.was{clip-path:inset(0 0 0 0)}
+.in .rot img.on{z-index:2;transform:scale(1)}
+.in .rot img.was{z-index:1}
+.caprow{flex-wrap:wrap}
+.rot-ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gra)}
+.rot-nav{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;color:var(--svart);background:none;border:1px solid var(--svart);border-radius:50%;cursor:pointer;transition:background .25s,color .25s,transform .2s var(--ease)}
+.rot-nav:hover{background:var(--svart);color:#fff}
+.rot-nav:active{transform:scale(.92)}
+.rot{cursor:pointer;touch-action:pan-y}
+.rot-pause{position:relative;font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--svart);background:none;border:1px solid var(--svart);border-radius:999px;padding:3px 10px;cursor:pointer;transition:background .3s,color .3s}
+.rot-pause:hover,.rot-pause.paused{background:var(--svart);color:#fff}
+
+/* ---------- Instagram ---------- */
+.card .who-ig{display:inline-block;margin-top:8px;font-size:11px;padding-bottom:2px;background:linear-gradient(var(--rod),var(--rod)) 0 100%/100% 1px no-repeat;transition:background-size .4s var(--ease)}
+.card .who-ig:hover{background-size:35% 1px}
+.ig-end{flex:none;height:100%;display:flex;flex-direction:column;justify-content:center;gap:14px;width:min(520px,82vw);padding:0 clamp(32px,5vw,90px);background:var(--rosa)}
+.ig-end .ig-k{font-size:clamp(26px,2.8vw,42px);font-weight:700;line-height:1.05;letter-spacing:-.02em}
+.ig-end .ig-h{font-size:clamp(22px,2.2vw,32px);font-style:italic;color:var(--rod);width:fit-content;background:linear-gradient(var(--rod),var(--rod)) 0 100%/0 2px no-repeat;transition:background-size .45s var(--ease)}
+.ig-end:hover .ig-h{background-size:100% 2px}
+.ig-end .ig-s{font-size:12px;max-width:34ch}
+.ig-link{background:linear-gradient(currentColor,currentColor) 0 100%/100% 1px no-repeat}
+
+/* ---------- Mellomstore vinduer: kortere meny ---------- */
+@media (max-width:1100px){
+  .menu a:nth-child(n+3):not(.pill):not(.more){display:none}
+  .menu .more{display:inline}
+}
+
+/* ---------- Smale vinduer og mobil: én kolonne, vanlig rulling ---------- */
+@media (max-width:900px){
+  :root{--edge-y:10px;--edge-x:10px;--pad:20px;--top:56px;--bot:56px;--body:15px}
+  html{scroll-snap-type:none}
+  .snap{display:none}
+  .spread{position:relative;height:auto;padding:5px var(--edge-x)}
+  .spread:first-of-type{padding-top:var(--edge-y)}
+  .sheet{grid-template-columns:minmax(0,1fr);height:auto}
+  .page{min-height:calc(100svh - 20px)}
+  .page.bleed{min-height:70svh}
+  .folio{display:none}
+  .menu a:not(.pill):not(.more){display:none!important}
+  .menu .more{display:inline-block!important;padding:12px 6px;font-size:13px}
+  .menu{gap:10px;top:12px}
+  h1{font-size:clamp(40px,12vw,64px)}
+  h3,.h3{font-size:clamp(32px,9vw,46px)}
+  h2{font-size:clamp(24px,7vw,32px)}
+  .cap,.facts dt,.facts dd,.team figcaption{font-size:12px}
+  .kick{font-size:12px}
+  .hero-r{padding:72px var(--pad) var(--bot)}
+  .hero-r .fx{min-height:60svh}
+  .pair{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-rows:auto}
+  .pair .fx,.pair>.ph{height:42svh}
+  .pair .c1,.pair .c2{grid-area:auto;align-self:auto}
+  .team{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(220px,auto)}
+  .team figcaption{height:42px}
+  .team-page{padding-left:var(--pad);padding-right:var(--pad)}
+  .tcur{display:none}
+  .hscroll>.spread{position:sticky;top:0;height:100svh;padding:var(--edge-y) var(--edge-x)}
+  .hs-sheet{height:100%}
+  .card .ph{height:min(52svh,440px)}
+  .card.wide .ph{height:min(34svh,300px);width:min(78vw,420px)}
+  .card.wide.tall .ph{height:min(46svh,400px);width:auto}
+  .card .who-name{font-size:15px}
+  .card .who-fag{font-size:11px}
+  .card .who-bio{font-size:13px}
+  .card .who-ig{font-size:13px;line-height:20px;padding:12px 0;background-position:0 calc(100% - 8px)}
+  .ig-end .ig-s{font-size:14px}
+  .card figcaption{max-width:80vw}
+  .hs-hint{display:none}
+  #s0 .page.l .run{display:none}  /* gir plass til Book-knappen øverst */
+  #s0 .page.l{padding-top:86px}  /* pusterom mellom toppen (logo, meny) og bildet */
+  .mob-hero{display:block;flex:1;min-height:30svh;margin:0 0 8px}  /* fast ramme på mobil (Scott) */
+  .mob-cap{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:8px 12px;margin:6px 0 18px}
+  .mob-credit{flex:1;min-width:0;min-height:2.9em;display:flex;align-items:center}  /* plass til to linjer, så teksten under ikke hopper når navnet er langt */
+  .rot-pause{padding:6px 12px}
+  .rot-pause::after,.rot-nav::after{content:"";position:absolute;inset:-8px -6px}
+  .rot-nav{width:32px;height:32px}
+  #s0 .hero-r{display:none}
+  .f-top{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .f-cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .f-cols>div:last-child{grid-column:1/-1}  /* e-postadressen får hele bredden */
+  .f-cols a,.f-cols span{font-size:14px;line-height:20px;padding:12px 0}
+  .contact input,.contact textarea{font-size:16px}  /* hindrer zoom på iPhone */
+  .f-legal{font-size:12px}
+  .f-legal a{padding:13px 0;line-height:18px}
+  .slot-pause{padding:7px 12px}
+  .send-row button{padding:9px 18px;font-size:13px}
+  .hs-count,.hs-back{font-size:12px}
+  .hs-back{padding:12px 0;bottom:calc(clamp(22px,4.5vh,40px) - 2px)} /* 44 px trykkflate */
+  .pill{padding:8px 14px;font-size:12px}
+  .pill::after,.slot-pause::after{content:"";position:absolute;inset:-6px -4px}  /* 44 px trykkflate uten stor knapp */
+  .slot-pause::after{inset:-8px -6px}
+  #s2 .page.l{min-height:0}
+  .facts.push{margin-top:clamp(24px,4vh,36px)}
+  .contact{order:-1}  /* skjemaet først, lenkene etterpå */
+  .f-band{padding-top:62px}  /* plass til pauseknappen over teksten */
+}
+
+/* ---------- Telefon på tvers: lav skjerm, så bildet får mer høyde og overskriften krymper ---------- */
+@media (max-width:900px) and (orientation:landscape) and (max-height:520px){
+  .mob-hero{min-height:62svh}
+  h1{font-size:clamp(32px,10svh,48px)}
+  h3,.h3{font-size:clamp(28px,9svh,40px)}
+}
+
+/* ---------- Intro: hjørnene samles til logoen og åpner seg til arket ---------- */
+.intro{position:fixed;inset:0;z-index:100;pointer-events:none}
+.intro .box{position:absolute;top:calc(50% - 64px);bottom:calc(50% - 64px);left:calc(50% - 64px);right:calc(50% - 64px);animation:ibox 1.6s var(--curtain) .1s forwards}
+.intro .box i{position:absolute;width:34px;height:34px;border:5px solid var(--rod);opacity:0;animation:icorner 1.6s linear .1s forwards}
+.intro .box i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}
+.intro .box i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
+.intro .box i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}
+.intro .box i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
+.intro img{position:absolute;left:50%;top:50%;width:128px;height:128px;margin:-64px 0 0 -64px;animation:ilogo 1.6s linear .1s forwards}
+@keyframes ibox{
+  0%,34%{top:calc(50% - 64px);bottom:calc(50% - 64px);left:calc(50% - 64px);right:calc(50% - 64px);opacity:1}
+  90%{top:var(--edge-y);bottom:var(--edge-y);left:var(--edge-x);right:var(--edge-x);opacity:1}
+  100%{top:var(--edge-y);bottom:var(--edge-y);left:var(--edge-x);right:var(--edge-x);opacity:0}
+}
+@keyframes icorner{0%,30%{opacity:0}40%,100%{opacity:1}}
+@keyframes ilogo{0%,30%{opacity:1;transform:scale(1)}42%,100%{opacity:0;transform:scale(1.05)}}
+.intro-on #s0 .sheet{opacity:0;transform:scale(.965)}
+#s0 .sheet{transition:opacity .9s ease,transform 1.3s var(--ease)}
+
+/* ---------- Redusert bevegelse ---------- */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .intro{display:none}
+  .w>span,.ph,.ph img,.pn,.menu a,.tags span{transform:none!important;clip-path:none!important;opacity:1!important}
+  .sc{opacity:1}
+  .f-word{filter:none!important;opacity:1!important}
+  .f-aside{opacity:1!important}
+}
+
+/* ---------- Lave, brede vinduer (f.eks. 1366x650): bunnteksten får plass uten å gå inn i det rosa båndet ---------- */
+@media (min-width:901px) and (max-height:700px){
+  .f-top{padding-top:clamp(16px,3vh,24px);gap:12px clamp(24px,4vw,64px)}
+  .f-cols a,.f-cols span{line-height:1.5}
+  .f-band{gap:clamp(10px,2.5vh,20px);padding-top:clamp(14px,2.5vh,22px)}
+}
